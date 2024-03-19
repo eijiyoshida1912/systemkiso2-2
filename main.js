@@ -8,7 +8,7 @@ const draw = () => {
   const height = 780;
 
   // 町域情報をcsvから取得 -----------------------
-  let townArray = getCsv("./csv/13.csv");
+  let townArray = getCsv("./positioncsv/13.csv");
   // 始めの要素はheadなのでいらない
   townArray.shift();
   // 配列を市区町村、x、yだけにする
@@ -47,7 +47,7 @@ const draw = () => {
         width / 2 - plotWindowWidth / 2,
         width / 2 + plotWindowWidth / 2
       );
-      const townY = pMap(
+      let townY = pMap(
         element.y,
         minLocationY,
         maxLocationY,
@@ -55,64 +55,19 @@ const draw = () => {
         height / 2 + plotWindowHeight / 2
       );
       console.log(townY);
+      // Y軸は反対に表示されるので反転させる
+      townY = townY + (plotWindowHeight - townY) * 2;
       ctx.font = "16px sans-serif";
       ctx.fillText(element.name, townX, townY);
       ctx.fillRect(townX, townY, 10, 10);
     });
   }
 
+  // 境界線（県境）を描画 ----------
+  // 境界線データをローカルXMLから取り込んでJSONに変換
+  // pending
+
   /*
-  // 町域情報取得API
-  let allTownData = fetchApi(
-    "https://geoapi.heartrails.com/api/json?method=getTowns&prefecture=%E6%9D%B1%E4%BA%AC%E9%83%BD"
-  );
-  allTownData.then(function (value) {
-    const townArray = value.response.location;
-    // 市区町村名のリストを作成。重複させない
-    let townNameArray = townArray.map((obj) => {
-      return obj.city;
-    });
-    townNameArray = Array.from(new Set(townNameArray));
-
-    // 町の座標だけを抜き出して配列を再生成
-    // 町の座標の最大・最小の緯度経度を抽出
-    locationXArray = townArray.map((obj) => {
-      return Number(obj.x);
-    });
-    locationYArray = townArray.map((obj) => {
-      return Number(obj.y);
-    });
-    const minLocationX = Math.min(...locationXArray);
-    const maxLocationX = Math.max(...locationXArray);
-    const minLocationY = Math.min(...locationYArray);
-    const maxLocationY = Math.max(...locationYArray);
-    // 表示させるウィンドウの幅
-    const plotWindowWidth =
-      (plotWindowHeight * (maxLocationX - minLocationX)) /
-      (maxLocationY - minLocationY);
-
-    // 町の座標に点を打つ
-    if (canvas.getContext) {
-      let ctx = canvas.getContext("2d");
-      townArray.forEach((element) => {
-        const townX = pMap(
-          element.x,
-          minLocationX,
-          maxLocationX,
-          width / 2 - plotWindowWidth / 2,
-          width / 2 + plotWindowWidth / 2
-        );
-        const townY = pMap(
-          element.y,
-          minLocationY,
-          maxLocationY,
-          height / 2 - plotWindowHeight / 2,
-          height / 2 + plotWindowHeight / 2
-        );
-        ctx.fillRect(townX, townY, 2, 2);
-      });
-    }
-
     // 不動産取引価格情報取得API
     let allRealEstateData = fetchApi(
       "https://www.land.mlit.go.jp/webland/api/TradeListSearch?from=20151&to=20152&area=13"
