@@ -1,4 +1,14 @@
 const draw = () => {
+  // 都道府県初期値
+  let prefecture = "13";
+
+  // selectの値を取得
+  const select = document.getElementById("select");
+  select.addEventListener("change", (e) => {
+    console.log(e.target.value);
+    // 変更したら各種csv,apiを呼びなおす
+  });
+
   const loading = document.getElementById("loading");
   let canvas = document.getElementById("tutorial");
   let ctx = canvas.getContext("2d");
@@ -11,22 +21,12 @@ const draw = () => {
   const height = 780;
 
   // 町域情報をcsvから取得 -----------------------
-  let townArray = getCsv("./positioncsv/13.csv");
-  // 始めの要素はheadなのでいらない
-  townArray.shift();
-  // 配列を市区町村、x、yだけにする
-  townArray = townArray.map((e) => {
-    return { name: e[3].replaceAll('"', ""), x: e[7], y: e[6] };
-  });
-  // 重複した市区町村を削除。残すのは先頭のひとつ
-  townArray = townArray.filter(
-    (element, index, self) =>
-      self.findIndex((e) => e.name === element.name) === index
-  );
+  const townArray = getTownCsv(prefecture);
 
   // 不動産取引価格情報取得API
   let allRealEstateData = fetchApi(
-    "https://www.land.mlit.go.jp/webland/api/TradeListSearch?from=20151&to=20152&area=13"
+    "https://www.land.mlit.go.jp/webland/api/TradeListSearch?from=20151&to=20152&area=" +
+      prefecture
   );
   allRealEstateData.then(function (value) {
     loading.classList.add("disable");
@@ -64,6 +64,8 @@ const draw = () => {
       thisTown.areaAverage = townAreaTotal / townData.length;
     });
 
+    console.log(townArray);
+
     // 描画 ------------------------
 
     // 町の座標だけを抜き出して配列を再生成
@@ -79,7 +81,8 @@ const draw = () => {
       (maxLocationY - minLocationY);
 
     // 境界線（県境）を描画
-    let borderArray = getCsv("./borderxml/border13.csv");
+    //let borderArray = getCsv("./borderxml/border13.csv");
+    let borderArray = getCsv("./borderxml/border" + prefecture + ".csv");
     borderArray.forEach((v) => {
       const borderX = pMap(
         v[1],
@@ -164,24 +167,24 @@ const pMap = (value, fromMin, fromMax, toMin, toMax) => {
 };
 
 //CSVファイルを文字列で取得
-function getCsv(url) {
-  var txt = new XMLHttpRequest();
+const getCsv = (url) => {
+  let txt = new XMLHttpRequest();
   txt.open("get", url, false);
   txt.send();
 
   //改行ごとに配列化
-  var arr = txt.responseText.split("\n");
+  let arr = txt.responseText.split("\n");
 
   //1次元配列を2次元配列に変換
-  var res = [];
-  for (var i = 0; i < arr.length; i++) {
+  let res = [];
+  for (let i = 0; i < arr.length; i++) {
     //空白行が出てきた時点で終了
     if (arr[i] == "") break;
 
     //","ごとに配列化
     res[i] = arr[i].split(",");
 
-    for (var i2 = 0; i2 < res[i].length; i2++) {
+    for (let i2 = 0; i2 < res[i].length; i2++) {
       //数字の場合は「"」を削除
       if (res[i][i2].match(/\-?\d+(.\d+)?(e[\+\-]d+)?/)) {
         res[i][i2] = parseFloat(res[i][i2].replace('"', ""));
@@ -189,4 +192,22 @@ function getCsv(url) {
     }
   }
   return res;
-}
+};
+
+// 都道府県を指定して町の緯度経度情報を取得
+const getTownCsv = (prefecture) => {
+  let townArray = getCsv("./positioncsv/" + prefecture + ".csv");
+  // 始めの要素はheadなのでいらない
+  townArray.shift();
+  // 配列を市区町村、x、yだけにする
+  townArray = townArray.map((e) => {
+    return { name: e[3].replaceAll('"', ""), x: e[7], y: e[6] };
+  });
+  // 重複した市区町村を削除。残すのは先頭のひとつ
+  townArray = townArray.filter(
+    (element, index, self) =>
+      self.findIndex((e) => e.name === element.name) === index
+  );
+
+  return townArray;
+};
