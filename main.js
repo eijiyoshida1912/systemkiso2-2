@@ -1,5 +1,7 @@
 const draw = () => {
   let canvas = document.getElementById("tutorial");
+  let ctx = canvas.getContext("2d");
+
   // プロットした時の画面の高さ。仮
   let plotWindowHeight = 400;
   // 画面の幅
@@ -20,10 +22,6 @@ const draw = () => {
     (element, index, self) =>
       self.findIndex((e) => e.name === element.name) === index
   );
-
-  // 境界線（県境）を描画 ----------
-  // 境界線データをローカルXMLから取り込んでJSONに変換
-  // pending
 
   // 不動産取引価格情報取得API
   let allRealEstateData = fetchApi(
@@ -61,11 +59,7 @@ const draw = () => {
       // 町の取引価格平均を町データオブジェクトに追加
       thisTown.priceAverage = townTradePriceTotal / townData.length;
       thisTown.areaAverage = townAreaTotal / townData.length;
-
-      console.log(thisTown);
     });
-
-    console.log(townArray);
 
     // 描画 ------------------------
 
@@ -81,9 +75,30 @@ const draw = () => {
       (plotWindowHeight * (maxLocationX - minLocationX)) /
       (maxLocationY - minLocationY);
 
+    // 境界線（県境）を描画
+    let borderArray = getCsv("./borderxml/border13.csv");
+    borderArray.forEach((v) => {
+      const borderX = pMap(
+        v[1],
+        minLocationX,
+        maxLocationX,
+        width / 2 - plotWindowWidth / 2,
+        width / 2 + plotWindowWidth / 2
+      );
+      let borderY = pMap(
+        v[0],
+        minLocationY,
+        maxLocationY,
+        height / 2 - plotWindowHeight / 2,
+        height / 2 + plotWindowHeight / 2
+      );
+      // Y軸は反対に表示されるので反転させる
+      borderY = borderY + (plotWindowHeight - borderY) * 2;
+      ctx.fillRect(borderX, borderY, 2, 2);
+    });
+
     // 町の座標に点を打つ
     if (canvas.getContext) {
-      let ctx = canvas.getContext("2d");
       townArray.forEach((element) => {
         const townX = pMap(
           element.x,
