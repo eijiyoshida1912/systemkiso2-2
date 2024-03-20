@@ -1,4 +1,5 @@
 const draw = () => {
+  const loading = document.getElementById("loading");
   let canvas = document.getElementById("tutorial");
   let ctx = canvas.getContext("2d");
 
@@ -28,13 +29,15 @@ const draw = () => {
     "https://www.land.mlit.go.jp/webland/api/TradeListSearch?from=20151&to=20152&area=13"
   );
   allRealEstateData.then(function (value) {
+    loading.classList.add("disable");
+
+    console.log("ha?");
     // 市区町村ごとのデータを作成。
     // 市区町村名・x軸・y軸・取引価格平均・面積平均
 
     // 市区町村ごとの取引価格平均を出す
     // TradePriceをMunicipality単位で合算
     // Municipalityごとの配列を作る
-    //console.log(value.data);
     // 全てのデータ
     const allDataArray = value.data;
 
@@ -94,6 +97,7 @@ const draw = () => {
       );
       // Y軸は反対に表示されるので反転させる
       borderY = borderY + (plotWindowHeight - borderY) * 2;
+      ctx.fillStyle = "#512354";
       ctx.fillRect(borderX, borderY, 2, 2);
     });
 
@@ -117,17 +121,14 @@ const draw = () => {
         // Y軸は反対に表示されるので反転させる
         townY = townY + (plotWindowHeight - townY) * 2;
         ctx.font = "12px sans-serif";
-        ctx.fillStyle = "#000";
+        ctx.fillStyle = "#efaaf3";
         ctx.textAlign = "center";
         ctx.fillText(element.name, townX, townY + 15);
-        ctx.fill();
         // 価格平均
-        ctx.fillStyle = "#00F";
+        ctx.fillStyle = "#1a9a8b";
         ctx.fillRect(townX - 5, townY, 10, -element.priceAverage / 700000);
-        ctx.fill();
-        ctx.fillStyle = "#F00";
+        ctx.fillStyle = "#e9262c";
         ctx.fillRect(townX + 5, townY, 10, -element.areaAverage / 2);
-        ctx.fill();
       });
     }
   });
