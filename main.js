@@ -13,14 +13,13 @@ const draw = () => {
   townArray.shift();
   // 配列を市区町村、x、yだけにする
   townArray = townArray.map((e) => {
-    return { name: e[3], x: e[7], y: e[6] };
+    return { name: e[3].replaceAll('"', ""), x: e[7], y: e[6] };
   });
   // 重複した市区町村を削除。残すのは先頭のひとつ
   townArray = townArray.filter(
     (element, index, self) =>
       self.findIndex((e) => e.name === element.name) === index
   );
-  console.log(townArray);
 
   // 町の座標に点を打つ ------------------------
 
@@ -54,7 +53,6 @@ const draw = () => {
         height / 2 - plotWindowHeight / 2,
         height / 2 + plotWindowHeight / 2
       );
-      console.log(townY);
       // Y軸は反対に表示されるので反転させる
       townY = townY + (plotWindowHeight - townY) * 2;
       ctx.font = "16px sans-serif";
@@ -67,20 +65,48 @@ const draw = () => {
   // 境界線データをローカルXMLから取り込んでJSONに変換
   // pending
 
-  /*
-    // 不動産取引価格情報取得API
-    let allRealEstateData = fetchApi(
-      "https://www.land.mlit.go.jp/webland/api/TradeListSearch?from=20151&to=20152&area=13"
-    );
-    allRealEstateData.then(function (value) {
-      // ここでプロミスオブジェクトの中身をああだこうだする。
-      console.log(value);
-    });
-  });
-  */
+  // 不動産取引価格情報取得API
+  let allRealEstateData = fetchApi(
+    "https://www.land.mlit.go.jp/webland/api/TradeListSearch?from=20151&to=20152&area=13"
+  );
+  allRealEstateData.then(function (value) {
+    // 市区町村ごとのデータを作成。
+    // 市区町村名・x軸・y軸・取引価格平均・面積平均
 
-  // 市区町村ごとのデータを作成。
-  // 市区町村名・x軸・y軸・取引価格平均・面積平均
+    // 市区町村ごとの取引価格平均を出す
+    // TradePriceをMunicipality単位で合算
+    // Municipalityごとの配列を作る
+    //console.log(value.data);
+    // 全てのデータ
+    const allDataArray = value.data;
+
+    // 市区町村ごとに処理
+    townArray.forEach((town) => {
+      // 町を検索
+      const townData = allDataArray.filter((v) => {
+        return v.Municipality.indexOf(town.name) != -1;
+      });
+      // 町の取引価格合計
+      let townTradePriceTotal = townData.reduce(function (sum, element) {
+        return sum + parseInt(element.TradePrice);
+      }, 0);
+      // 町の面積合計
+      let townAreaTotal = townData.reduce(function (sum, element) {
+        return sum + parseInt(element.Area);
+      }, 0);
+
+      const thisTown = townArray.find((v) => {
+        return v.name == town.name;
+      });
+      // 町の取引価格平均を町データオブジェクトに追加
+      thisTown.priceAverage = townTradePriceTotal / townData.length;
+      thisTown.areaAverage = townAreaTotal / townData.length;
+
+      console.log(thisTown);
+    });
+
+    console.log(townArray);
+  });
 };
 
 // APIから情報取得
