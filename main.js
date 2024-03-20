@@ -21,46 +21,6 @@ const draw = () => {
       self.findIndex((e) => e.name === element.name) === index
   );
 
-  // 町の座標に点を打つ ------------------------
-
-  // 町の座標だけを抜き出して配列を再生成
-  // 町の座標の最大・最小の緯度経度を抽出
-  const minLocationX = Math.min(...townArray.map((p) => p.x));
-  const maxLocationX = Math.max(...townArray.map((p) => p.x));
-  const minLocationY = Math.min(...townArray.map((p) => p.y));
-  const maxLocationY = Math.max(...townArray.map((p) => p.y));
-
-  // 表示させるウィンドウの幅
-  const plotWindowWidth =
-    (plotWindowHeight * (maxLocationX - minLocationX)) /
-    (maxLocationY - minLocationY);
-
-  // 町の座標に点を打つ
-  if (canvas.getContext) {
-    let ctx = canvas.getContext("2d");
-    townArray.forEach((element) => {
-      const townX = pMap(
-        element.x,
-        minLocationX,
-        maxLocationX,
-        width / 2 - plotWindowWidth / 2,
-        width / 2 + plotWindowWidth / 2
-      );
-      let townY = pMap(
-        element.y,
-        minLocationY,
-        maxLocationY,
-        height / 2 - plotWindowHeight / 2,
-        height / 2 + plotWindowHeight / 2
-      );
-      // Y軸は反対に表示されるので反転させる
-      townY = townY + (plotWindowHeight - townY) * 2;
-      ctx.font = "16px sans-serif";
-      ctx.fillText(element.name, townX, townY);
-      ctx.fillRect(townX, townY, 10, 10);
-    });
-  }
-
   // 境界線（県境）を描画 ----------
   // 境界線データをローカルXMLから取り込んでJSONに変換
   // pending
@@ -106,6 +66,55 @@ const draw = () => {
     });
 
     console.log(townArray);
+
+    // 描画 ------------------------
+
+    // 町の座標だけを抜き出して配列を再生成
+    // 町の座標の最大・最小の緯度経度を抽出
+    const minLocationX = Math.min(...townArray.map((p) => p.x));
+    const maxLocationX = Math.max(...townArray.map((p) => p.x));
+    const minLocationY = Math.min(...townArray.map((p) => p.y));
+    const maxLocationY = Math.max(...townArray.map((p) => p.y));
+
+    // 表示させるウィンドウの幅
+    const plotWindowWidth =
+      (plotWindowHeight * (maxLocationX - minLocationX)) /
+      (maxLocationY - minLocationY);
+
+    // 町の座標に点を打つ
+    if (canvas.getContext) {
+      let ctx = canvas.getContext("2d");
+      townArray.forEach((element) => {
+        const townX = pMap(
+          element.x,
+          minLocationX,
+          maxLocationX,
+          width / 2 - plotWindowWidth / 2,
+          width / 2 + plotWindowWidth / 2
+        );
+        let townY = pMap(
+          element.y,
+          minLocationY,
+          maxLocationY,
+          height / 2 - plotWindowHeight / 2,
+          height / 2 + plotWindowHeight / 2
+        );
+        // Y軸は反対に表示されるので反転させる
+        townY = townY + (plotWindowHeight - townY) * 2;
+        ctx.font = "12px sans-serif";
+        ctx.fillStyle = "#000";
+        ctx.textAlign = "center";
+        ctx.fillText(element.name, townX, townY + 15);
+        ctx.fill();
+        // 価格平均
+        ctx.fillStyle = "#00F";
+        ctx.fillRect(townX - 5, townY, 10, -element.priceAverage / 700000);
+        ctx.fill();
+        ctx.fillStyle = "#F00";
+        ctx.fillRect(townX + 5, townY, 10, -element.areaAverage / 2);
+        ctx.fill();
+      });
+    }
   });
 };
 
