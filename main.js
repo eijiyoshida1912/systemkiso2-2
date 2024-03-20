@@ -1,18 +1,20 @@
-const draw = () => {
-  // 都道府県初期値
-  let prefecture = "13";
-
+// 初期表示
+const init = (pref) => {
   // selectの値を取得
   const select = document.getElementById("select");
   select.addEventListener("change", (e) => {
-    console.log(e.target.value);
     // 変更したら各種csv,apiを呼びなおす
+    draw(String(e.target.value));
   });
+  draw(pref);
+};
 
+const draw = (pref) => {
   const loading = document.getElementById("loading");
+  loading.classList.remove("disable");
   let canvas = document.getElementById("tutorial");
   let ctx = canvas.getContext("2d");
-
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   // プロットした時の画面の高さ。仮
   let plotWindowHeight = 400;
   // 画面の幅
@@ -21,12 +23,12 @@ const draw = () => {
   const height = 780;
 
   // 町域情報をcsvから取得 -----------------------
-  const townArray = getTownCsv(prefecture);
+  const townArray = getTownCsv(pref);
 
   // 不動産取引価格情報取得API
   let allRealEstateData = fetchApi(
     "https://www.land.mlit.go.jp/webland/api/TradeListSearch?from=20151&to=20152&area=" +
-      prefecture
+      pref
   );
   allRealEstateData.then(function (value) {
     loading.classList.add("disable");
@@ -82,7 +84,7 @@ const draw = () => {
 
     // 境界線（県境）を描画
     //let borderArray = getCsv("./borderxml/border13.csv");
-    let borderArray = getCsv("./borderxml/border" + prefecture + ".csv");
+    let borderArray = getCsv("./borderxml/border" + pref + ".csv");
     borderArray.forEach((v) => {
       const borderX = pMap(
         v[1],
