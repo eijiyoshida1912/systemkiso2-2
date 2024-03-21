@@ -33,7 +33,6 @@ const draw = (pref) => {
   allRealEstateData.then(function (value) {
     loading.classList.add("disable");
 
-    console.log("ha?");
     // 市区町村ごとのデータを作成。
     // 市区町村名・x軸・y軸・取引価格平均・面積平均
 
@@ -65,8 +64,6 @@ const draw = (pref) => {
       thisTown.priceAverage = townTradePriceTotal / townData.length;
       thisTown.areaAverage = townAreaTotal / townData.length;
     });
-
-    console.log(townArray);
 
     // 描画 ------------------------
 
@@ -103,7 +100,7 @@ const draw = (pref) => {
       // Y軸は反対に表示されるので反転させる
       borderY = borderY + (plotWindowHeight - borderY) * 2;
       ctx.fillStyle = "#512354";
-      ctx.fillRect(borderX, borderY, 2, 2);
+      ctx.fillRect(borderX, borderY, 1, 1);
     });
 
     // 町の座標に点を打つ
@@ -131,9 +128,10 @@ const draw = (pref) => {
         ctx.fillText(element.name, townX, townY + 15);
         // 価格平均
         ctx.fillStyle = "#1a9a8b";
-        ctx.fillRect(townX - 5, townY, 10, -element.priceAverage / 700000);
+        ctx.fillRect(townX - 5, townY, 10, -element.priceAverage / 500000);
+        // 面積平均
         ctx.fillStyle = "#e9262c";
-        ctx.fillRect(townX + 5, townY, 10, -element.areaAverage / 2);
+        ctx.fillRect(townX + 5, townY, 10, -element.areaAverage / 3);
       });
     }
   });
@@ -141,16 +139,13 @@ const draw = (pref) => {
 
 // APIから情報取得
 const fetchApi = async (url) => {
-  // setLoading(true);
   return await axios
     .get(url)
     .then(function (response) {
       return response.data;
     })
     .catch(function (error) {})
-    .finally(() => {
-      //  setLoading(false);
-    });
+    .finally(() => {});
 };
 
 // processingのmap関数
