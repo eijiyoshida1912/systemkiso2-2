@@ -197,6 +197,7 @@ const getTownCsv = (prefecture) => {
   // 始めの要素はheadなのでいらない
   townArray.shift();
   // 配列を市区町村、x、yだけにする
+  console.log(townArray);
   townArray = townArray.map((e) => {
     return { name: e[3].replaceAll('"', ""), x: e[7], y: e[6] };
   });
