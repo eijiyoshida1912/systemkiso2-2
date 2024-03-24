@@ -22,6 +22,12 @@ const draw = (pref) => {
   // 画面の高さ
   const height = 780;
 
+  // その都道府県の平均価格
+  let prefPriceAverage;
+
+  // その都道府県の平均面積
+  let prefAreaAverage;
+
   // 町域情報をcsvから取得 -----------------------
   const townArray = getTownCsv(pref);
 
@@ -80,7 +86,6 @@ const draw = (pref) => {
       (maxLocationY - minLocationY);
 
     // 境界線（県境）を描画
-    //let borderArray = getCsv("./borderxml/border13.csv");
     let borderArray = getCsv("./borderxml/border" + pref + ".csv");
     borderArray.forEach((v) => {
       const borderX = pMap(
@@ -131,12 +136,57 @@ const draw = (pref) => {
         ctx.fillRect(townX - 5, townY, 10, -element.priceAverage / 500000);
         // 面積平均
         ctx.fillStyle = "#e9262c";
-        ctx.fillRect(townX + 5, townY, 10, -element.areaAverage / 3);
+        ctx.fillRect(townX + 5, townY, 10, -element.areaAverage / 10);
       });
+
+      // その都道府県の価格平均
+      const sumPrice = townArray.reduce(
+        (acc, cur) => {
+          // Check if areaAverage is NaN, if so, consider it as 0
+          const priceToAdd = isNaN(cur.priceAverage) ? 0 : cur.priceAverage;
+          return { priceAverage: acc.priceAverage + priceToAdd };
+        },
+        { priceAverage: 0 } // Initial accumulator value
+      );
+      prefPriceAverage = sumPrice.priceAverage / townArray.length;
+
+      // その都道府県の面積平均
+      const sumArea = townArray.reduce(
+        (acc, cur) => {
+          // Check if areaAverage is NaN, if so, consider it as 0
+          const areaToAdd = isNaN(cur.areaAverage) ? 0 : cur.areaAverage;
+          return { areaAverage: acc.areaAverage + areaToAdd };
+        },
+        { areaAverage: 0 } // Initial accumulator value
+      );
+      prefAreaAverage = sumArea.areaAverage / townArray.length;
+
+      // 取引価格平均と建物面積平均を表示
+      ctx.font = "12px sans-serif";
+      ctx.fillStyle = "#efaaf3";
+      ctx.textAlign = "left";
+      ctx.fillText("取引価格平均", 10, 650);
+      ctx.fillStyle = "#1a9a8b";
+      ctx.fillRect(90, 640, prefPriceAverage / 100000, 10);
+      ctx.fillStyle = "#efaaf3";
+      ctx.fillText(
+        Math.floor(prefPriceAverage / 10000) + "万円",
+        prefPriceAverage / 100000 + 100,
+        650
+      );
+
+      ctx.fillText("建物面積平均", 10, 680);
+      ctx.fillStyle = "#e9262c";
+      ctx.fillRect(90, 670, prefAreaAverage / 2, 10);
+      ctx.fillStyle = "#efaaf3";
+      ctx.fillText(
+        Math.floor(prefAreaAverage) + "平方メートル",
+        prefAreaAverage / 2 + 100,
+        680
+      );
     }
   });
 };
-
 // APIから情報取得
 const fetchApi = async (url) => {
   return await axios
@@ -197,7 +247,6 @@ const getTownCsv = (prefecture) => {
   // 始めの要素はheadなのでいらない
   townArray.shift();
   // 配列を市区町村、x、yだけにする
-  console.log(townArray);
   townArray = townArray.map((e) => {
     return { name: e[3].replaceAll('"', ""), x: e[7], y: e[6] };
   });
