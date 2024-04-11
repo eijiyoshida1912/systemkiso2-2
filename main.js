@@ -33,8 +33,7 @@ const draw = (pref) => {
 
   // 不動産取引価格情報取得API
   let allRealEstateData = fetchApi(
-    "https://www.land.mlit.go.jp/webland/api/TradeListSearch?from=20151&to=20152&area=" +
-      pref
+    "http://eijiyoshida1912.itigo.jp/syskiso2-api/public/api/realestate/" + pref
   );
   allRealEstateData.then(function (value) {
     loading.classList.add("disable");
