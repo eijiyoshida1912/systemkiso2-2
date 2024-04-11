@@ -1,3 +1,6 @@
+// データが置いてあるドメイン
+const dataDomain = "http://eijiyoshida1912.itigo.jp/";
+
 // 初期表示
 const init = (pref) => {
   // selectの値を取得
@@ -33,7 +36,7 @@ const draw = (pref) => {
 
   // 不動産取引価格情報取得API
   let allRealEstateData = fetchApi(
-    "http://eijiyoshida1912.itigo.jp/syskiso2-api/public/api/realestate/" + pref
+    dataDomain + "syskiso2-api/public/api/realestate/" + pref
   );
   allRealEstateData.then(function (value) {
     loading.classList.add("disable");
@@ -85,7 +88,9 @@ const draw = (pref) => {
       (maxLocationY - minLocationY);
 
     // 境界線（県境）を描画
-    let borderArray = getCsv("./borderxml/border" + pref + ".csv");
+    let borderArray = getCsv(
+      dataDomain + "syskiso2-data/borderxml/border" + pref + ".csv"
+    );
     borderArray.forEach((v) => {
       const borderX = pMap(
         v[1],
@@ -242,7 +247,9 @@ const getCsv = (url) => {
 
 // 都道府県を指定して町の緯度経度情報を取得
 const getTownCsv = (prefecture) => {
-  let townArray = getCsv("./positioncsv/" + prefecture + ".csv");
+  let townArray = getCsv(
+    dataDomain + "syskiso2-data/positioncsv/" + prefecture + ".csv"
+  );
   // 始めの要素はheadなのでいらない
   townArray.shift();
   // 配列を市区町村、x、yだけにする
